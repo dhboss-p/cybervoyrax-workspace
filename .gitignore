@@ -22,3 +22,14 @@ venv/
 # Python/runtime files
 *.log
 # Local editor / OS files
+
+# Runtime files
+instance/*.db
+instance/*.sqlite
+instance/*.sqlite3
+instance/logs/
+instance/cache/
+
+# Runtime user uploads
+# Files already tracked by Git remain tracked; newly-created uploads are ignored.
+instance/uploads/*
