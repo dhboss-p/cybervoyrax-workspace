@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% from "_workspace.html" import workspace_start,workspace_end %}
+{% block title %}Status · CYBERVOYRAX Workspace{% endblock %}
+{% block body %}
+{{workspace_start("",current_user)}}
+<section class="product-page info-page">
+  <header class="product-page-header info-header">
+    <div><p class="eyebrow">CYBERVOYRAX Workspace</p><h1>System status</h1><p>Current service state for this workspace instance.</p></div>
+  </header>
+  <div class="status-summary"><span class="status-live-dot"></span><strong>All systems operational</strong></div>
+  <div class="status-list">
+    {% for name,state in checks %}<div class="status-row"><span>{{name}}</span><strong>{{state}}</strong></div>{% endfor %}
+  </div>
+  <dl class="status-meta"><div><dt>Workspace version</dt><dd>Phase 5 baseline</dd></div><div><dt>Environment</dt><dd>Local training instance</dd></div></dl>
+  <p class="status-checked">Last checked {{checked_at.strftime('%b %d, %Y at %-I:%M %p')}}</p>
+</section>
+{{workspace_end()}}
+{% endblock %}

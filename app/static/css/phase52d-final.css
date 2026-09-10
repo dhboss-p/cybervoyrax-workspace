@@ -1,0 +1,88 @@
+/* CYBERVOYRAX Workspace — Phase 5.2D final finishing pass */
+
+/* Authenticated product pages have a deliberate visual ending. */
+.content.content-topnav{
+  min-height:calc(100vh - 64px);
+  display:flex;
+  flex-direction:column;
+  padding-bottom:0!important;
+}
+.workspace-footer{
+  margin-top:auto;
+  padding:34px 0 32px;
+  border-top:1px solid var(--line,#e2e8ef);
+  color:#7b8ca1;
+  font-size:11px;
+}
+.workspace-footer-inner{display:flex;align-items:center;justify-content:space-between;gap:22px;min-height:24px}
+.workspace-footer nav{display:flex;align-items:center;gap:20px;flex-wrap:wrap}
+.workspace-footer a{color:#687c96;text-decoration:none;transition:color 120ms ease}
+.workspace-footer a:hover{color:#075fc9}
+
+/* Main workspace navigation is text-led: no decorative object icons. */
+.workspace-nav a{gap:0;padding-inline:16px}
+.workspace-nav a i{display:none!important}
+.workspace-nav a.active:after{left:16px;right:16px}
+
+/* Home hero: one left-aligned copy block; image lives only on the far right. */
+.product-hero{
+  display:block!important;
+  min-height:164px;
+  margin:0 -48px 32px;
+  padding:38px 48px 34px!important;
+  background:
+    linear-gradient(90deg,#fff 0%,#fff 44%,rgba(255,255,255,.98) 52%,rgba(255,255,255,.82) 66%,rgba(255,255,255,.34) 100%),
+    url("../images/workspace-hero.webp") right center/auto 100% no-repeat!important;
+}
+.product-hero .hero-copy{width:min(610px,52%);position:relative;z-index:2}
+.product-hero .date{margin-bottom:10px}
+.product-hero h1{margin:0!important;max-width:610px}
+.product-hero p{margin:9px 0 0!important;max-width:520px}
+
+/* Recent work has a designed end rather than falling into blank canvas. */
+.feed-end{padding:23px 4px 8px;border-top:1px solid var(--line,#e2e8ef);text-align:center;color:#71849d}
+.feed-end span{display:block;color:#354c68;font-size:12px;font-weight:650}
+.feed-end small{display:block;margin-top:3px;font-size:10px;color:#8897a9}
+
+/* People project connections are individually interactive even though the row remains the primary target. */
+.person-projects{display:flex!important;align-items:center;gap:5px;flex-wrap:wrap;white-space:normal!important;overflow:visible!important}
+.person-project-link{position:relative;color:#52729a;text-decoration:none;cursor:pointer;transition:color 120ms ease}
+.person-project-link:hover{color:#075fc9;text-decoration:underline;text-underline-offset:2px}
+.person-project-sep{color:#9aabba}
+
+/* Projects use the available middle space for relationship context. */
+.product-row .project-people{align-self:center}
+.product-row .avatar-stack{margin-bottom:7px}
+.product-row .project-lead small{display:block;margin-top:2px}
+
+/* Product-information pages are intentionally quiet and content-first. */
+.info-page{max-width:850px;width:100%}
+.info-header{border-bottom:1px solid var(--line,#e2e8ef)}
+.info-sections{padding:5px 0 38px}
+.info-section{padding:25px 0;border-bottom:1px solid var(--line,#e2e8ef)}
+.info-section h2{margin:0 0 7px;font-size:18px;letter-spacing:-.025em;font-weight:660;color:var(--ink,#0b1730)}
+.info-section p{margin:0;max-width:720px;color:#687d98;font-size:13px;line-height:1.65}
+.status-summary{display:flex;align-items:center;gap:10px;padding:25px 2px;border-bottom:1px solid var(--line,#e2e8ef);font-size:15px}
+.status-live-dot{width:8px;height:8px;border-radius:50%;background:#0d9f68;box-shadow:0 0 0 4px #e9f8f1}
+.status-list{padding-top:4px}
+.status-row{display:flex;align-items:center;justify-content:space-between;gap:20px;padding:17px 2px;border-bottom:1px solid var(--line,#e2e8ef);font-size:13px}
+.status-row strong{color:#0d8d61;font-size:11px;font-weight:650}
+.status-checked{margin:14px 2px 34px;color:#8998aa;font-size:10px}
+
+@media(max-width:1050px){
+  .product-hero{margin-left:-28px;margin-right:-28px;padding-left:28px!important;padding-right:28px!important;background:linear-gradient(90deg,#fff 0%,#fff 48%,rgba(255,255,255,.92) 65%,rgba(255,255,255,.48) 100%),url("../images/workspace-hero.webp") right center/auto 100% no-repeat!important}
+  .product-hero .hero-copy{width:min(590px,62%)}
+}
+@media(max-width:760px){
+  .content.content-topnav{min-height:calc(100vh - 64px)}
+  .workspace-nav a{padding-inline:13px}
+  .product-hero{min-height:auto;margin:0 -18px 24px;padding:30px 18px 28px!important;background:linear-gradient(90deg,#fff 0%,rgba(255,255,255,.96) 70%,rgba(255,255,255,.82) 100%),url("../images/workspace-hero.webp") right center/auto 100% no-repeat!important}
+  .product-hero .hero-copy{width:82%;max-width:520px}
+  .workspace-footer{padding:28px 0}
+  .workspace-footer-inner{align-items:flex-start;flex-direction:column;gap:10px}
+  .workspace-footer nav{gap:14px}
+}
+@media(max-width:480px){
+  .product-hero .hero-copy{width:94%}
+  .product-hero{background:linear-gradient(90deg,#fff 0%,rgba(255,255,255,.97) 78%,rgba(255,255,255,.88) 100%),url("../images/workspace-hero.webp") right center/auto 100% no-repeat!important}
+}

@@ -1,0 +1,84 @@
+{% extends "base.html" %}
+{% from "_workspace.html" import workspace_start, workspace_end %}
+{% block title %}Home · CYBERVOYRAX Workspace{% endblock %}
+{% block body %}
+{{workspace_start("dashboard",current_user)}}
+<section class="product-hero">
+  <div class="hero-copy">
+    <div class="date">{{ now.strftime('%A, %B %d, %Y') }}</div>
+    <h1>Good {{ 'morning' if now.hour < 12 else 'afternoon' if now.hour < 18 else 'evening' }}, {{current_user.first_name}}</h1>
+    <p>Here’s what’s happening in your workspace.</p>
+  </div>
+</section>
+
+<div class="product-grid">
+  <main class="product-main">
+    <div class="section-head">
+      <div><h1>My Projects <span class="section-count">{{project_count}}</span></h1><p>Projects you’re involved in. Open one to continue your work.</p></div>
+      <a class="module-action" href="/projects/new">+ New project</a>
+    </div>
+    <div class="project-list">
+      {% for p in projects %}
+      <a class="product-row" href="/projects/{{p.id}}">
+        <div>
+          <h3>{{p.name}}</h3><p>{{p.description}}</p>
+          <div class="row-meta"><span>{{p.department}}</span><span>Due {{p.due_on.strftime('%b %d, %Y') if p.due_on else 'Not set'}}</span><span>{{p.document_count}} document{{'' if p.document_count==1 else 's'}}</span></div>
+        </div>
+        <div class="project-people">
+          <div class="avatar-stack">{% for m in p.members[:4] %}<span class="mini-avatar">{{m.first_name[0]}}{{m.last_name[0]}}</span>{% endfor %}{% if p.members|length > 4 %}<span class="mini-avatar">+{{p.members|length-4}}</span>{% endif %}</div>
+          <div class="project-lead"><strong>{{p.lead}}</strong><small>Project lead</small></div>
+        </div>
+        <div class="row-status"><span class="status-dot">{{p.status|title}}</span></div>
+        <span class="row-arrow">→</span>
+      </a>
+      {% else %}<div class="empty-state">No projects are available to you yet.</div>{% endfor %}
+    </div>
+
+    <section class="recent-work">
+      <div class="section-head"><div><h2>Recent Work</h2></div></div>
+      <div class="work-tabs" data-work-tabs>
+        <button class="active" type="button" data-work-filter="all">All</button>
+        <button type="button" data-work-filter="DOCUMENT">Documents</button>
+        <button type="button" data-work-filter="PROJECT_COMMENTED">Comments</button>
+        <button type="button" data-work-filter="PROJECT">Project updates</button>
+      </div>
+      <div class="recent-work-list">
+      {% for item in recent_work %}
+        {% set href = '/projects/' ~ item.entity_id if item.entity_type == 'project' else '/documents/' ~ item.entity_id if item.entity_type == 'document' else '#' %}
+        <a class="activity-row" href="{{href}}" data-work-type="{{item.event_type}} {{item.entity_type|upper}}">
+          <div><strong>{{item.actor_name or 'Workspace'}} {{item.summary}}</strong><small>{{item.event_type|replace('_',' ')|title}}</small></div>
+          <div class="context">{{item.context_name or 'Workspace'}}</div>
+          <time>{{item.created_at.strftime('%b %d, %H:%M') if item.created_at else ''}}</time>
+        </a>
+      {% else %}<div class="empty-state">No recent activity yet.</div>{% endfor %}
+      </div>
+      {% if recent_work %}
+      <div class="feed-end" aria-label="End of recent work">
+        <span>You’re all caught up</span>
+        <small>That’s all the recent work available in your workspace.</small>
+      </div>
+      {% endif %}
+    </section>
+  </main>
+
+  <aside class="product-rail">
+    <section class="rail-section">
+      <div class="section-head"><h2>Upcoming</h2><a class="section-link" href="/projects">View all →</a></div>
+      {% for p in upcoming %}
+      <a class="agenda-item" href="/projects/{{p.id}}" style="text-decoration:none;color:inherit">
+        <div class="agenda-date">{{p.due_on.strftime('%b')|upper}}<strong>{{p.due_on.strftime('%d')}}</strong></div><div class="agenda-line"></div>
+        <div class="agenda-copy"><strong>{{p.name}}</strong><small>Project deadline · {{p.department}}</small></div>
+      </a>
+      {% else %}<div class="empty-state">No upcoming project deadlines.</div>{% endfor %}
+    </section>
+    <section class="rail-section">
+      <div class="section-head"><h2>Recent Activity</h2><a class="section-link" href="/activity">View all →</a></div>
+      {% for item in recent_activity[:6] %}
+      {% set repeated = not loop.first and recent_activity[loop.index0-1].actor_name == item.actor_name %}
+      <div class="feed-item {{'feed-repeat' if repeated else ''}}">{% if not repeated %}<span class="feed-avatar">{{item.first_name[0] if item.first_name else 'W'}}{{item.last_name[0] if item.last_name else ''}}</span>{% else %}<span class="feed-continuation"></span>{% endif %}<div><strong>{% if not repeated %}{{item.actor_name or 'Workspace'}} {% endif %}{{item.summary}}</strong><p>{{item.event_type|replace('_',' ')|title}} · {{item.created_at.strftime('%b %d, %H:%M') if item.created_at else ''}}</p></div></div>
+      {% else %}<div class="empty-state">No recent activity.</div>{% endfor %}
+    </section>
+  </aside>
+</div>
+{{workspace_end()}}
+{% endblock %}

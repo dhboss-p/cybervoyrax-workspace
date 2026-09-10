@@ -1,0 +1,51 @@
+{% extends "base.html" %}{% from "_workspace.html" import workspace_start,workspace_end %}{% block title %}{{document.title}} · Documents · CYBERVOYRAX Workspace{% endblock %}{% block body %}{{workspace_start("documents",current_user)}}
+<section class="document-detail">
+  <a class="back-link" href="/documents">← Documents</a>
+  <header class="document-detail-header">
+    <div>
+      <p class="eyebrow">{{document.document_code}}</p>
+      <h1>{{document.title}}</h1>
+      <p>{{document.original_filename}} · {{document.project_name or 'Workspace'}} · {{document.visibility|replace('_',' ')|title}}</p>
+    </div>
+    <div class="document-actions">
+      {% if can_preview %}<a class="button" target="_blank" href="/documents/{{document.id}}/preview">Open preview</a>{% endif %}
+      <a class="button button-primary" href="/documents/{{document.id}}/download">Download</a>
+      {% if can_delete %}<form method="post" action="/documents/{{document.id}}/delete" onsubmit="return confirm('Delete this document?');"><input type="hidden" name="_csrf_token" value="{{ csrf_token() }}"><button class="button button-danger">Delete</button></form>{% endif %}
+    </div>
+  </header>
+  <div class="document-layout">
+    <div>
+      {% if can_preview %}
+      <section class="document-preview" aria-label="Document preview">
+        {% if preview_kind == 'image' %}
+          <img src="/documents/{{document.id}}/preview" alt="Preview of {{document.title}}">
+        {% elif preview_kind in ['pdf','text'] %}
+          <iframe src="/documents/{{document.id}}/preview" title="Preview of {{document.title}}"></iframe>
+        {% endif %}
+      </section>
+      {% else %}
+      <section class="file-summary" aria-label="File information">
+        <div>
+          <strong>{{document.original_filename}}</strong>
+          <span>{{file_type_label}} · {{file_size_label}}</span>
+        </div>
+        <p>Preview isn’t available for this file type. Download the file to open it in a compatible application.</p>
+      </section>
+      {% endif %}
+      {% if document.description %}<section class="plain-section document-description"><h2>Description</h2><p>{{document.description}}</p></section>{% endif %}
+    </div>
+    <aside class="document-meta">
+      <section class="plain-section">
+        <h2>Details</h2>
+        <dl class="plain-dl">
+          <div><dt>Owner</dt><dd>{{document.owner_name}}</dd></div>
+          <div><dt>Project</dt><dd>{{document.project_name or 'Workspace'}}</dd></div>
+          <div><dt>Access</dt><dd>{{document.visibility|replace('_',' ')|title}}</dd></div>
+          <div><dt>File type</dt><dd>{{file_type_label}}</dd></div>
+          <div><dt>Size</dt><dd>{{file_size_label}}</dd></div>
+          <div><dt>Uploaded</dt><dd>{{uploaded_label}}</dd></div>
+        </dl>
+      </section>
+    </aside>
+  </div>
+</section>{{workspace_end()}}{% endblock %}

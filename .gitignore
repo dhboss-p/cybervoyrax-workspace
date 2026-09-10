@@ -1,0 +1,24 @@
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.env
+.venv/
+venv/
+.idea/
+.vscode/
+.DS_Store
+.upgrade-backups/
+
+# Locally generated assessment credential
+.lab-credentials
+# Local secrets / generated credentials
+.env.*
+!.env.example
+# Upgrade and backup files
+*.bak
+*.backup
+*.orig
+*~
+# Python/runtime files
+*.log
+# Local editor / OS files

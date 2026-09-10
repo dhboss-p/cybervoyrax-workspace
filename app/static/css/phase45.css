@@ -1,0 +1,122 @@
+/*
+ * CYBERVOYRAX Workspace Phase 4.5
+ * Office background source:
+ * Polina Zimmerman / Pexels
+ * https://www.pexels.com/photo/photo-of-building-interior-3778622/
+ */
+
+:root{
+  --cvx-office-photo:
+    linear-gradient(135deg,#edf4fb,#dfe9f4);
+}
+
+/* Real office environment across the entire light workspace canvas. */
+.workspace{
+  background:
+    linear-gradient(rgba(244,248,252,.68), rgba(244,248,252,.76)),
+    var(--cvx-office-photo) center center / cover fixed no-repeat !important;
+}
+
+/*
+ * Give the background some depth without reducing readability.
+ * This lives behind all content/cards and never touches the sidebar.
+ */
+.workspace::before{
+  content:"" !important;
+  position:fixed !important;
+  inset:78px 0 0 286px !important;
+  pointer-events:none !important;
+  z-index:0 !important;
+  background:
+    linear-gradient(90deg, rgba(243,248,252,.18), rgba(243,248,252,.42)),
+    radial-gradient(circle at 52% 10%, rgba(255,255,255,.20), transparent 38%) !important;
+  opacity:1 !important;
+}
+
+.content{
+  position:relative;
+  z-index:1;
+}
+
+/* Keep module surfaces crisp over the photograph. */
+.summary-card,
+.dashboard-card,
+.module-toolbar,
+.data-panel,
+.employee-card,
+.admin-stat,
+.admin-card,
+.account-card,
+.account-hero,
+.card{
+  background:rgba(255,255,255,.95) !important;
+  backdrop-filter:blur(7px);
+  -webkit-backdrop-filter:blur(7px);
+}
+
+/* Slightly stronger edge so the office image never competes with content. */
+.summary-card,
+.dashboard-card,
+.module-toolbar,
+.data-panel,
+.employee-card,
+.admin-stat,
+.admin-card,
+.account-card,
+.account-hero{
+  border-color:rgba(207,220,233,.96) !important;
+  box-shadow:0 8px 26px rgba(24,53,90,.085) !important;
+}
+
+/* Make the banner use the real office photo instead of a simulated office. */
+.workplace-banner{
+  background:#fff;
+}
+
+.office-photo-layer{
+  background:
+    linear-gradient(90deg, rgba(220,235,244,.08), rgba(230,240,246,.18)),
+    var(--cvx-office-photo) center 47% / cover no-repeat !important;
+}
+
+.office-photo-layer .office-photo-shade{
+  background:
+    linear-gradient(90deg, rgba(14,39,65,.02), rgba(255,255,255,.18) 42%, rgba(255,255,255,.06)) !important;
+}
+
+.office-photo-layer .office-glass,
+.office-photo-layer .office-plant{
+  display:none !important;
+}
+
+.office-message{
+  padding:10px 12px;
+  border-radius:8px;
+  background:rgba(255,255,255,.72);
+  backdrop-filter:blur(4px);
+  -webkit-backdrop-filter:blur(4px);
+}
+
+/* Main headings remain very readable over lighter/darker image areas. */
+.hero-heading,
+.module-heading{
+  text-shadow:0 1px 0 rgba(255,255,255,.65);
+}
+
+@media(max-width:1050px){
+  .workspace::before{
+    inset:78px 0 0 225px !important;
+  }
+}
+
+@media(max-width:780px){
+  .workspace{
+    background:
+      linear-gradient(rgba(244,248,252,.90),rgba(244,248,252,.94)),
+      var(--cvx-office-photo) center / cover fixed no-repeat !important;
+  }
+
+  .workspace::before{
+    display:none !important;
+  }
+}

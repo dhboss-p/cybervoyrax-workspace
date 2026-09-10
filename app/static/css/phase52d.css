@@ -1,0 +1,66 @@
+/* CYBERVOYRAX Workspace — Phase 5.2D.1 deterministic typography */
+:root{
+  --font-product:"Manrope","Avenir Next","Segoe UI Variable","Segoe UI",ui-sans-serif,system-ui,-apple-system,sans-serif;
+  --type-display:clamp(2.15rem,3vw,3.15rem); --type-page:clamp(1.9rem,2.35vw,2.5rem);
+  --type-section:1.35rem; --type-object:1.02rem; --type-body:.875rem; --type-meta:.76rem; --type-label:.68rem;
+  --space-1:4px;--space-2:8px;--space-3:12px;--space-4:16px;--space-6:24px;--space-8:32px;--space-12:48px;--space-16:64px;
+  --ink:#0c1930;--muted:#667b97;--quiet:#8291a6;--line:#e2e8ef;--blue:#086fdf;--blue-soft:#f2f7fd;--canvas:#fff;
+}
+html,body,button,input,select,textarea{font-family:var(--font-product)!important}
+body{font-size:14px;font-weight:400;line-height:1.5;color:var(--ink);font-feature-settings:"kern" 1,"liga" 1}
+.workspace-wordmark strong{font-weight:750;letter-spacing:.055em}.workspace-wordmark span{font-size:10px;letter-spacing:.01em}
+.workspace-nav a{font-weight:560}.workspace-profile-copy strong{font-weight:650}
+.eyebrow,.product-page-header .eyebrow{font-size:var(--type-label)!important;font-weight:700!important;letter-spacing:.14em!important;color:#72859e!important}
+.product-page-header h1{font-size:var(--type-page);font-weight:680;line-height:1.06;letter-spacing:-.045em}
+.product-page-header p{font-size:var(--type-body);line-height:1.55;margin-top:8px}
+.section-head h1{font-size:clamp(1.75rem,2.2vw,2.2rem);font-weight:680;letter-spacing:-.04em}.section-head h2{font-size:var(--type-section);font-weight:670;letter-spacing:-.035em}.section-head p{font-size:var(--type-meta);line-height:1.55}
+.section-count{font-weight:650}
+
+/* Local hero asset. The image is part of the page canvas, never a rounded dashboard card. */
+.product-hero{margin:0 -48px 32px;padding:54px 48px 46px;border:0;border-bottom:1px solid var(--line);border-radius:0;background:
+ linear-gradient(90deg,#fff 0%,rgba(255,255,255,.98) 35%,rgba(255,255,255,.82) 58%,rgba(255,255,255,.38) 100%),
+ url("../images/workspace-hero.webp") right center/auto 100% no-repeat!important}
+.product-hero::after{display:none}.product-hero .date{font-size:var(--type-meta);font-weight:520;margin-bottom:12px}.product-hero h1{font-size:var(--type-display);font-weight:680;letter-spacing:-.052em;line-height:1}.product-hero p{font-size:1rem;line-height:1.45;margin-top:10px;color:#617795}.product-quote{display:none!important}
+/* Login uses the same bundled asset more visibly. */
+.auth-form-panel{background:linear-gradient(rgba(247,250,253,.72),rgba(247,250,253,.88)),url("../images/workspace-hero.webp") center/cover no-repeat!important}
+
+/* Primary objects: richer hierarchy without cards. */
+.product-row{grid-template-columns:minmax(0,1.65fr) minmax(180px,.65fr) 90px 28px;min-height:112px;padding:20px 10px 20px 0;gap:24px;border-color:var(--line)}
+.product-row h3{font-size:var(--type-object);font-weight:680;letter-spacing:-.018em;margin-bottom:4px}.product-row p{font-size:var(--type-meta);line-height:1.5;color:#657b98;max-width:620px;margin-bottom:11px}.row-meta{font-size:var(--type-label);gap:16px;color:#647a96}.project-lead strong{font-size:var(--type-meta);font-weight:650}.project-lead small{font-size:var(--type-label)}.mini-avatar{width:25px;height:25px;font-size:8px}.status-dot{font-size:var(--type-label);font-weight:600;padding:4px 9px}
+@media(hover:hover) and (pointer:fine){
+ .product-row:hover,.person-row:hover,.document-row:hover,.activity-row:hover,.admin-nav-row:hover,.admin-user-row:hover,.search-result:hover{background:linear-gradient(90deg,#f8fbff,rgba(248,251,255,.3));transform:translateX(2px)}
+ .product-row:hover h3,.person-row:hover .object-title>strong,.document-row:hover .object-title>strong{color:#075fc9}
+ .product-row:hover .row-arrow,.person-row:hover .row-arrow,.document-row:hover .row-arrow,.admin-nav-row:hover .row-arrow,.admin-user-row:hover .row-arrow{transform:translateX(4px)}
+}
+.product-row,.person-row,.document-row,.activity-row,.admin-nav-row,.admin-user-row,.row-arrow{transition:background-color 125ms ease,color 125ms ease,transform 125ms ease,border-color 125ms ease,box-shadow 125ms ease}
+
+/* Home rail: repeated activity by the same actor reads as a group. */
+.feed-item{grid-template-columns:36px minmax(0,1fr);gap:11px;padding:9px 0}.feed-item.feed-repeat{padding-top:2px}.feed-continuation{width:32px;position:relative}.feed-continuation::before{content:"";position:absolute;left:15px;top:-10px;bottom:-10px;border-left:1px solid #dbe5ef}.feed-item strong{font-size:var(--type-meta);font-weight:620}.feed-item p{font-size:var(--type-label);margin-top:2px}.feed-avatar{font-size:9px;font-weight:720}
+.activity-row{padding:13px 4px}.activity-row strong{font-size:var(--type-meta);font-weight:620}.activity-row small,.activity-row .context,.activity-row time{font-size:var(--type-label)}
+.rail-section h2{font-size:var(--type-section);font-weight:670}.agenda-copy strong{font-size:var(--type-meta);font-weight:650}.agenda-copy small{font-size:var(--type-label)}
+
+/* People becomes a relationship view, not a bare directory. */
+.person-row{grid-template-columns:minmax(0,1.45fr) minmax(210px,.55fr) 28px;padding:19px 6px;min-height:82px}.object-title>strong{font-size:var(--type-object);font-weight:660;letter-spacing:-.015em}.object-title>small{font-size:var(--type-meta);margin-top:2px}.person-projects{display:block;margin-top:9px;font-size:var(--type-label);color:#52729a;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:720px}.person-row .object-context strong{display:block;font-size:var(--type-meta);font-weight:600;color:#435c79}.person-row .object-context small{display:block;font-size:var(--type-label);margin-top:3px;color:#8190a3}
+
+/* Documents: primary title, secondary filename, quiet context/date. */
+.document-row{grid-template-columns:minmax(0,1.35fr) minmax(170px,.72fr) minmax(130px,.55fr) minmax(130px,.48fr) 28px;padding:18px 6px;min-height:76px}.document-row .object-title strong{font-size:var(--type-object);font-weight:660}.document-row .object-title small{font-size:var(--type-label)}.document-row .object-context{font-size:var(--type-meta)}.document-access{display:flex;flex-direction:column;align-items:flex-start;gap:5px}.document-access small{font-size:var(--type-label);color:#8997a9}.access-pill{font-size:10px;background:#f3f6f9;color:#5e7188;padding:3px 7px}
+
+/* Project workspace typography. */
+.project-context{padding-top:42px}.project-context h1{font-size:var(--type-page);font-weight:680;letter-spacing:-.05em;line-height:1.05}.project-context p{font-size:var(--type-body);line-height:1.6}.context-meta{font-size:var(--type-meta);margin-top:16px}.project-tabs button{font-size:var(--type-meta);font-weight:540;padding:12px 2px}.project-tabs button.active{font-weight:680}.plain-section h2{font-size:var(--type-section);font-weight:660}.plain-section p{font-size:var(--type-body)}.plain-dl dt{font-size:var(--type-label);font-weight:600}.plain-dl dd{font-size:var(--type-meta)}
+
+/* Admin is the same product language. Numbers support objects rather than becoming KPI cards. */
+.admin-summary{padding-top:42px}.admin-workspace-line{padding:24px 6px}.admin-workspace-line h2{font-size:1.3rem;font-weight:670}.admin-workspace-line p{font-size:var(--type-meta)}.admin-facts span{font-size:var(--type-label)}.admin-facts strong{font-size:1.25rem;font-weight:670}.admin-nav-row{padding:17px 6px}.admin-nav-row strong{font-size:var(--type-object);font-weight:640}.admin-nav-row small,.admin-preview{font-size:var(--type-label)}.admin-user-row{transition:background-color 125ms ease,transform 125ms ease}.admin-setting-section h2{font-size:var(--type-section);font-weight:660}.admin-setting-section>p{font-size:var(--type-body);color:var(--muted)}
+.appearance-preview{display:grid;grid-template-columns:220px minmax(0,1fr);gap:20px;align-items:center;margin-top:16px;padding:16px 0;border-top:1px solid var(--line)}.appearance-image{height:88px;background:linear-gradient(90deg,rgba(255,255,255,.45),rgba(255,255,255,.05)),url("../images/workspace-hero.webp") center/cover no-repeat;border:1px solid #dce5ee}.appearance-preview strong{display:block;font-size:var(--type-meta)}.appearance-preview small,.appearance-preview span{display:block;font-size:var(--type-label);color:#7b8da3;margin-top:4px}
+
+/* Controls: quick, physical response; no theatrical entrance. */
+.button,.module-action{font-weight:630;transition:transform 110ms ease,box-shadow 110ms ease,background-color 110ms ease}.button:active,.module-action:active{transform:scale(.985)}
+.workspace-nav a{transition:background-color 130ms ease,color 130ms ease,transform 130ms ease}.workspace-nav a:hover i{transform:translateY(-1px)}.workspace-nav i{transition:transform 130ms ease}.project-tabs button,.work-tabs button,.filter-chip{transition:color 140ms ease,background-color 140ms ease,border-color 140ms ease,transform 140ms ease}
+.workspace-profile-menu{transition:opacity 150ms ease,transform 150ms ease,visibility 150ms ease!important}
+
+/* Consistent page rhythm. */
+.product-page{padding-top:48px}.product-page-header{padding-bottom:24px}.filter-bar{padding:16px 0}.section-head{margin-bottom:12px}.recent-work{margin-top:34px}.plain-section{padding-bottom:28px;margin-bottom:28px}
+.settings-panel h2{font-size:var(--type-section);font-weight:660}.profile-header h1{font-size:var(--type-page);font-weight:680}.profile-header p{font-size:var(--type-meta)}
+
+@media(max-width:1050px){.product-row{grid-template-columns:minmax(0,1fr) 170px 80px 24px}.document-row{grid-template-columns:minmax(0,1fr) 150px 130px 28px}.document-row .hide-tablet{display:none}.product-hero{padding-top:44px;padding-bottom:40px}.appearance-preview{grid-template-columns:180px 1fr}}
+@media(max-width:760px){.product-page{padding-top:30px}.product-hero{margin:0 -18px 24px;padding:38px 18px 34px;background:linear-gradient(90deg,#fff 0%,rgba(255,255,255,.9) 70%,rgba(255,255,255,.55) 100%),url("../images/workspace-hero.webp") right center/auto 100% no-repeat!important}.product-hero h1{font-size:clamp(2rem,10vw,2.65rem)}.product-row{min-height:auto;padding:17px 2px}.person-row{grid-template-columns:minmax(0,1fr) 28px}.person-row .object-context{display:none}.person-projects{white-space:normal}.document-row{grid-template-columns:minmax(0,1fr) 28px}.document-access{display:none}.appearance-preview{grid-template-columns:1fr}.appearance-image{height:120px}}
+@media(prefers-reduced-motion:reduce){*{transition-duration:.01ms!important;animation-duration:.01ms!important;animation-iteration-count:1!important}}

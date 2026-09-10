@@ -1,0 +1,82 @@
+{% macro icon(name) -%}
+{% if name=="home" or name=="dashboard" %}<svg viewBox="0 0 24 24"><path d="M4 10.5 12 4l8 6.5V20a1 1 0 0 1-1 1h-5v-6h-4v6H5a1 1 0 0 1-1-1z"/></svg>
+{% elif name=="directory" %}<svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.5"/><path d="M3 20v-1.5A5.5 5.5 0 0 1 8.5 13h1A5.5 5.5 0 0 1 15 18.5V20M16 7h5M18.5 4.5v5"/></svg>
+{% elif name=="projects" %}<svg viewBox="0 0 24 24"><path d="M3 7h7l2 2h9v11H3z"/></svg>
+{% elif name=="documents" %}<svg viewBox="0 0 24 24"><path d="M6 2h8l4 4v16H6zM14 2v5h5M9 12h6M9 16h6"/></svg>
+{% elif name=="admin" %}<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19 12a7 7 0 0 0-.1-1l2-1.5-2-3.4-2.4 1a8 8 0 0 0-1.7-1L14.5 3h-5L9.2 6a8 8 0 0 0-1.7 1l-2.4-1-2 3.4 2 1.5a7 7 0 0 0 0 2L3 14.5l2 3.4 2.4-1a8 8 0 0 0 1.7 1l.4 3.1h5l.4-3.1a8 8 0 0 0 1.7-1l2.4 1 2-3.4-2-1.5a7 7 0 0 0 .1-1z"/></svg>
+{% elif name=="account" %}<svg viewBox="0 0 24 24"><circle cx="12" cy="7" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg>
+{% elif name=="search" %}<svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/></svg>
+{% elif name=="bell" %}<svg viewBox="0 0 24 24"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9M10 21h4"/></svg>
+{% elif name=="chevron" %}<svg viewBox="0 0 24 24"><path d="m9 10 3 3 3-3"/></svg>
+{% elif name=="menu" %}<svg viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+{% endif %}
+{%- endmacro %}
+
+{% macro topnav(active="dashboard", current_user=None) %}
+<header class="workspace-header" data-workspace-header>
+  <div class="workspace-header-main">
+    <div class="workspace-brand-group">
+      <button class="workspace-mobile-menu" type="button" data-mobile-nav-toggle aria-label="Open navigation">{{icon("menu")}}</button>
+      <a class="workspace-wordmark" href="/dashboard"><strong>CYBERVOYRAX</strong><span>Workspace</span></a>
+    </div>
+
+    <nav class="workspace-nav" data-mobile-nav aria-label="Workspace navigation">
+      <a class="{{'active' if active=='dashboard' else ''}}" href="/dashboard"><span>Home</span></a>
+      <a class="{{'active' if active=='directory' else ''}}" href="/directory"><span>People</span></a>
+      <a class="{{'active' if active=='projects' else ''}}" href="/projects"><span>Projects</span></a>
+      <a class="{{'active' if active=='documents' else ''}}" href="/documents"><span>Documents</span></a>
+    </nav>
+
+    <div class="workspace-tools">
+      <form class="workspace-search" action="/search" method="get" data-search-shell>
+        <i>{{icon("search")}}</i>
+        <input name="q" type="search" autocomplete="off" placeholder="Search workspace" aria-label="Search workspace">
+        <kbd>/</kbd>
+      </form>
+      <a class="workspace-notification" href="/notifications" aria-label="Notifications">{{icon("bell")}}<span></span></a>
+      <div class="workspace-profile-wrap">
+        <button class="workspace-profile" data-profile-toggle type="button" aria-haspopup="true" aria-expanded="false">
+          <span class="avatar">{{current_user.first_name[0] if current_user else 'A'}}{{current_user.last_name[0] if current_user else 'M'}}</span>
+          <span class="workspace-profile-copy"><strong>{{current_user.full_name if current_user else 'Alex Morgan'}}</strong><small>{{current_user.role if current_user else 'User'}}</small></span>
+          <span class="workspace-chevron">{{icon("chevron")}}</span>
+        </button>
+        <div class="workspace-profile-menu" data-profile-menu>
+          <div class="profile-menu-identity"><span class="avatar small">{{current_user.first_name[0] if current_user else 'A'}}{{current_user.last_name[0] if current_user else 'M'}}</span><div><strong>{{current_user.full_name if current_user else 'Alex Morgan'}}</strong><small>{{current_user.email if current_user and current_user.email else ''}}</small></div></div>
+          <div class="profile-menu-links">
+            <a href="/account">{{icon("account")}}<span>My account</span></a>
+            <a href="/account/profile">{{icon("account")}}<span>Edit profile</span></a>
+            {% if current_user and current_user.role == 'Administrator' %}
+            <a href="/admin">{{icon("admin")}}<span>Workspace administration</span></a>
+            {% endif %}
+          </div>
+          <form method="post" action="/logout"><input type="hidden" name="_csrf_token" value="{{ csrf_token() }}"><button class="profile-signout" type="submit">Sign out</button></form>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="mobile-nav-scrim" data-mobile-nav-scrim></div>
+</header>
+{% endmacro %}
+
+{% macro workspace_start(active="dashboard", current_user=None) %}
+<div class="app-shell app-shell-topnav"><main class="workspace workspace-topnav">{{topnav(active,current_user)}}<section class="content content-topnav" data-page-content>
+{% endmacro %}
+{% macro workspace_end() %}
+<footer class="workspace-footer" aria-label="Workspace footer">
+  <div class="workspace-footer-inner">
+    <span>© 2026 CYBERVOYRAX</span>
+    <nav aria-label="Product information">
+      <a href="/privacy">Privacy</a>
+      <a href="/terms">Terms</a>
+      <a href="/security">Security</a>
+      <a href="/help">Help</a>
+      <a href="/status">Status</a>
+    </nav>
+  </div>
+</footer>
+</section></main></div>{% endmacro %}
+
+{% macro status_badge(value) %}
+{% set v=(value or '')|lower %}
+<span class="badge {% if v=='active' %}green{% elif v=='planning' %}blue{% elif v in ['disabled','archived'] %}red{% else %}neutral{% endif %}">{{(value or 'Unknown')|replace('_',' ')|title}}</span>
+{% endmacro %}
