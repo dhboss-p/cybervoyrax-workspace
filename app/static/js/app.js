@@ -70,3 +70,21 @@ document.addEventListener("DOMContentLoaded",()=>{
   // Inbox filters.
   document.querySelectorAll("[data-inbox-filter]").forEach(btn=>btn.addEventListener("click",()=>{const mode=btn.dataset.inboxFilter;document.querySelectorAll("[data-inbox-filter]").forEach(x=>x.classList.toggle("active",x===btn));document.querySelectorAll("[data-inbox-list] [data-read]").forEach(row=>row.hidden=mode==="unread"&&row.dataset.read==="yes")}));
 });
+
+// Phase 6.4 project activity helpers.
+document.addEventListener("DOMContentLoaded",()=>{
+  const requestedTab=new URLSearchParams(window.location.search).get("tab");
+  if(requestedTab){
+    const tab=document.querySelector(`[data-tab="${CSS.escape(requestedTab)}"]`);
+    const panel=document.querySelector(`[data-panel="${CSS.escape(requestedTab)}"]`);
+    if(tab&&panel){document.querySelectorAll("[data-tab]").forEach(x=>x.classList.toggle("active",x===tab));document.querySelectorAll("[data-panel]").forEach(x=>x.classList.toggle("active",x===panel));}
+  }
+  document.querySelectorAll("[data-comment-edit]").forEach(btn=>btn.addEventListener("click",()=>{
+    const id=btn.dataset.commentEdit; const body=document.querySelector(`[data-comment-body="${CSS.escape(id)}"]`); const form=document.querySelector(`[data-comment-edit-form="${CSS.escape(id)}"]`);
+    if(body&&form){body.hidden=true;form.hidden=false;form.querySelector("textarea")?.focus();btn.closest("details")?.removeAttribute("open");}
+  }));
+  document.querySelectorAll("[data-comment-cancel]").forEach(btn=>btn.addEventListener("click",()=>{
+    const id=btn.dataset.commentCancel; const body=document.querySelector(`[data-comment-body="${CSS.escape(id)}"]`); const form=document.querySelector(`[data-comment-edit-form="${CSS.escape(id)}"]`);
+    if(body&&form){form.hidden=true;body.hidden=false;}
+  }));
+});

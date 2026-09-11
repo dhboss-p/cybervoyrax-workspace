@@ -145,9 +145,9 @@ def project_detail_page(project_id):
                             FROM projects p JOIN departments d ON d.id=p.department_id JOIN users u ON u.id=p.manager_user_id WHERE p.id=%s""",(project_id,))
     members=db.fetch_all("""SELECT u.id,u.first_name,u.last_name,u.job_title,pm.membership_role
                             FROM project_members pm JOIN users u ON u.id=pm.user_id WHERE pm.project_id=%s ORDER BY u.first_name,u.last_name""",(project_id,))
-    comments=db.fetch_all("""SELECT pc.id,pc.body,pc.created_at,pc.author_user_id,CONCAT(u.first_name,' ',u.last_name) author_name
+    comments=db.fetch_all("""SELECT pc.id,pc.body,pc.created_at,pc.updated_at,pc.author_user_id,CONCAT(u.first_name,' ',u.last_name) author_name
                              FROM project_comments pc JOIN users u ON u.id=pc.author_user_id WHERE pc.project_id=%s ORDER BY pc.created_at DESC LIMIT 40""",(project_id,))
-    documents=db.fetch_all("SELECT id,title,original_filename,visibility,uploaded_at FROM documents WHERE project_id=%s ORDER BY uploaded_at DESC",(project_id,))
+    documents=db.fetch_all("SELECT id,title,original_filename,visibility,uploaded_at,owner_user_id FROM documents WHERE project_id=%s ORDER BY uploaded_at DESC",(project_id,))
     project_activity=db.fetch_all("""SELECT a.summary,a.event_type,a.created_at,CONCAT(u.first_name,' ',u.last_name) actor_name
                                      FROM activity_logs a LEFT JOIN users u ON u.id=a.actor_user_id
                                      WHERE a.entity_type='project' AND a.entity_id=%s ORDER BY a.created_at DESC LIMIT 30""",(project_id,))
@@ -189,7 +189,37 @@ def project_comment(project_id):
         db.execute("INSERT INTO project_comments(project_id,author_user_id,body,created_at) VALUES(%s,%s,%s,%s)",(project_id,user.id,body,datetime.now()))
         activity(user.id,"PROJECT_COMMENTED","project",project_id,"added a project comment."); flash("Comment posted.","success")
     else: flash("Comment cannot be empty.","error")
-    return redirect(url_for("ui.project_detail_page",project_id=project_id))
+    return redirect(url_for("ui.project_detail_page",project_id=project_id)+"?tab=activity")
+
+@ui_bp.post("/projects/<int:project_id>/comments/<int:comment_id>/edit")
+@login_required
+def project_comment_edit(project_id,comment_id):
+    user=load_current_user(); s=build_services(); pobj=s["projects"].get_project(project_id); require_project_access(user,pobj,s["project_repository"])
+    comment=db.fetch_one("SELECT id,author_user_id FROM project_comments WHERE id=%s AND project_id=%s",(comment_id,project_id))
+    if not comment:
+        return render_template("error.html",status_code=404,message="Comment not found."),404
+    if comment["author_user_id"]!=user.id:
+        return render_template("error.html",status_code=403,message="You can only edit comments you created."),403
+    body=request.form.get("body","").strip()
+    if not body:
+        flash("Comment cannot be empty.","error")
+    else:
+        db.execute("UPDATE project_comments SET body=%s,updated_at=%s WHERE id=%s AND project_id=%s",(body,datetime.now(),comment_id,project_id))
+        activity(user.id,"PROJECT_COMMENT_EDITED","project",project_id,"edited a project comment."); flash("Comment updated.","success")
+    return redirect(url_for("ui.project_detail_page",project_id=project_id)+"?tab=activity")
+
+@ui_bp.post("/projects/<int:project_id>/comments/<int:comment_id>/delete")
+@login_required
+def project_comment_delete(project_id,comment_id):
+    user=load_current_user(); s=build_services(); pobj=s["projects"].get_project(project_id); require_project_access(user,pobj,s["project_repository"])
+    comment=db.fetch_one("SELECT id,author_user_id FROM project_comments WHERE id=%s AND project_id=%s",(comment_id,project_id))
+    if not comment:
+        return render_template("error.html",status_code=404,message="Comment not found."),404
+    if comment["author_user_id"]!=user.id and user.role!="Administrator":
+        return render_template("error.html",status_code=403,message="You can only delete comments you created."),403
+    db.execute("DELETE FROM project_comments WHERE id=%s AND project_id=%s",(comment_id,project_id))
+    activity(user.id,"PROJECT_COMMENT_DELETED","project",project_id,"deleted a project comment."); flash("Comment deleted.","success")
+    return redirect(url_for("ui.project_detail_page",project_id=project_id)+"?tab=activity")
 
 @ui_bp.post("/projects/<int:project_id>/members")
 @login_required
@@ -285,10 +315,18 @@ def document_download(document_id):
 @login_required
 def document_delete(document_id):
     user=load_current_user(); row=docrow(document_id)
+    project_id=row.get("project_id") if row else None
     if row and (user.role=="Administrator" or row["owner_user_id"]==user.id):
         p=docpath(row)
         if p and p.exists(): p.unlink()
-        db.execute("DELETE FROM documents WHERE id=%s",(document_id,)); activity(user.id,"DOCUMENT_DELETED","document",document_id,"deleted a document."); flash("Document deleted.","success")
+        db.execute("DELETE FROM documents WHERE id=%s",(document_id,))
+        activity(user.id,"DOCUMENT_DELETED","document",document_id,"deleted a document.")
+        if project_id:
+            activity(user.id,"PROJECT_DOCUMENT_DELETED","project",project_id,f"deleted document {row['title']}.")
+        flash("Document deleted.","success")
+    return_to_project=request.form.get("return_to_project",type=int)
+    if return_to_project and project_id==return_to_project:
+        return redirect(url_for("ui.project_detail_page",project_id=return_to_project)+"?tab=documents")
     return redirect(url_for("ui.documents_page"))
 
 @ui_bp.get("/integrations/preview")

@@ -16,7 +16,7 @@ class Config:
     JWT_TTL_MINUTES=int(os.getenv("JWT_TTL_MINUTES","30"))
     UPLOAD_FOLDER=os.getenv("UPLOAD_FOLDER","/workspace/instance/uploads")
     MAX_CONTENT_LENGTH=10*1024*1024
-    APP_VERSION="0.6.3-phase6.3"
-    APP_PHASE="6.3"
+    APP_VERSION="0.6.4-phase6.4"
+    APP_PHASE="6.4"
 
 
