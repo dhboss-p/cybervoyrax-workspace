@@ -50,7 +50,9 @@ You are not given a vulnerability checklist, challenge selector, flag list, payl
 
 You may use the same methodology and tools you would use during an authorized web application penetration test.
 
-## Requirements
+## Prerequisites
+
+CYBERVOYRAX runs inside Docker. You do not need to manually install Python, Flask, Gunicorn, MySQL, or the application's Python dependencies on your host system.
 
 Before installation, make sure you have:
 
@@ -58,8 +60,17 @@ Before installation, make sure you have:
 - Git
 - Docker
 - Docker Compose v2 (`docker compose`)
+- a running Docker daemon
 
-## Installation
+After cloning the repository, you can check your environment with:
+
+```bash
+bash scripts/check_requirements.sh
+```
+
+If a required component is missing, the check will stop and tell you what needs to be installed or fixed.
+
+## Quick start
 
 Clone the repository:
 
@@ -74,29 +85,33 @@ Create your local environment file:
 cp .env.example .env
 ```
 
-Before running the application, edit `.env` and replace the placeholder secrets and database passwords with local values.
+Review `.env` and replace the placeholder secrets and database passwords with local values.
 
-Build and start the application:
-
-```bash
-docker compose up -d --build
-```
-
-Confirm that the containers are running:
+Then run:
 
 ```bash
-docker compose ps
+bash scripts/setup.sh
 ```
 
-Provision the dedicated assessment account:
+The setup script will check the environment, build the application, start the database, initialize the workspace, provision the assessment account, and verify the installation.
 
-```bash
-bash scripts/provision_lab_accounts.sh
+When setup completes, open:
+
+```text
+http://127.0.0.1:5000
 ```
 
-The script generates the assessment password locally and stores it in the Git-ignored `.lab-credentials` file.
+If you changed `APP_PORT` in `.env`, use that port instead.
 
-View your credentials:
+## Assessment credentials
+
+Your locally generated assessment credentials are stored in:
+
+```text
+.lab-credentials
+```
+
+View them with:
 
 ```bash
 cat .lab-credentials
@@ -109,13 +124,7 @@ ASSESSMENT_EMAIL=assessor@cybervoyrax.test
 ASSESSMENT_PASSWORD=<locally-generated-password>
 ```
 
-Open the application in your browser:
-
-```text
-http://localhost:5000
-```
-
-If you changed `APP_PORT` in `.env`, use that port instead.
+Never commit `.lab-credentials` or `.env`.
 
 ## Assessment account
 
@@ -152,22 +161,16 @@ Severity should be based on the actual exploitability and impact you demonstrate
 
 ## Useful commands
 
-Start the workspace:
+Start an existing workspace:
 
 ```bash
 docker compose up -d
 ```
 
-Stop the workspace:
+Stop the workspace without deleting its database:
 
 ```bash
 docker compose down
-```
-
-Rebuild after local changes:
-
-```bash
-docker compose up -d --build
 ```
 
 Check container status:
@@ -182,10 +185,16 @@ View application logs:
 docker compose logs -f web
 ```
 
-Run the current structural verification:
+Rebuild the application while preserving the database:
 
 ```bash
-docker compose exec web python scripts/verify_phase63.py
+docker compose up -d --build
+```
+
+Check the local environment:
+
+```bash
+bash scripts/check_requirements.sh
 ```
 
 Run the account-baseline verification:
@@ -194,25 +203,83 @@ Run the account-baseline verification:
 docker compose exec web python scripts/verify_account_baseline.py
 ```
 
-## Data and uploads
+## Data and persistence
 
-Uploaded lab files persist under:
+CYBERVOYRAX separates application source code from runtime lab data.
+
+Persistent application data includes user accounts, projects, comments, document metadata, activity records, and other workspace state stored in the MySQL Docker volume.
+
+Uploaded files persist under:
 
 ```text
 ./instance/uploads/
 ```
 
+Assessment credentials are stored locally in:
+
+```text
+.lab-credentials
+```
+
+Local configuration is stored in:
+
+```text
+.env
+```
+
+Normal container restarts, rebuilds, and CYBERVOYRAX updates are designed to preserve this data.
+
 Use only fictional or disposable lab data. Do not upload real confidential or sensitive information to an intentionally vulnerable application.
+
+## Updating CYBERVOYRAX
+
+For a normal Git-based installation, update CYBERVOYRAX with:
+
+```bash
+bash scripts/update.sh
+```
+
+Before applying an update, the updater creates a local backup and checks that it can safely update the installation.
+
+Normal updates are designed to preserve:
+
+- user accounts and passwords
+- assessment credentials
+- projects and comments
+- document metadata and uploaded files
+- workspace database state
+- local `.env` configuration
+
+Upgrade backups are stored under:
+
+```text
+.upgrade-backups/
+```
+
+The updater will not overwrite tracked source files containing uncommitted modifications. If this happens, review them with:
+
+```bash
+git status
+git diff
+```
+
+The assessment account is not reprovisioned during a normal update, so the existing assessment credentials remain valid.
+
+Release-specific instructions should still be reviewed when a release contains unusual or breaking changes.
 
 ## Resetting the lab
 
-To stop the application without deleting the database volume:
+To stop CYBERVOYRAX without deleting the database:
 
 ```bash
 docker compose down
 ```
 
-To perform a full local reset, including the Docker database volume:
+This is safe for normal use.
+
+### Full destructive reset
+
+To completely remove the local database and return to a fresh lab state:
 
 ```bash
 docker compose down -v
@@ -221,21 +288,47 @@ docker compose up -d --build
 bash scripts/provision_lab_accounts.sh
 ```
 
-**Warning:** `docker compose down -v` deletes the local database volume and therefore removes your current lab database state.
+**Warning:** `docker compose down -v` deletes the CYBERVOYRAX MySQL Docker volume. This permanently removes the current database state, including accounts, projects, comments, document metadata, and other database-backed lab activity.
 
-## Updating CYBERVOYRAX
+A normal CYBERVOYRAX update does **not** require `docker compose down -v`.
 
-CYBERVOYRAX is designed to support incremental releases. When an upgrade package is provided, follow the instructions included with that release.
+## Troubleshooting
 
-Upgrade releases may create a backup, apply changed files, rebuild/restart the containers, and run release-specific verification. Release notes will state when a database migration or reset is required.
+Check whether the required environment is available:
 
-Do not assume every future release can be applied with the same commands; read the release notes first.
+```bash
+bash scripts/check_requirements.sh
+```
+
+Check the containers:
+
+```bash
+docker compose ps
+```
+
+View recent application logs:
+
+```bash
+docker compose logs --tail=100 web
+```
+
+View recent database logs:
+
+```bash
+docker compose logs --tail=100 db
+```
+
+If Docker cannot connect to the Docker daemon, make sure Docker is running and that your user has permission to access it.
+
+If port `5000` is already in use, change `APP_PORT` in `.env` and start the workspace again.
+
+Avoid deleting Docker volumes as a general troubleshooting step because doing so destroys the local database.
 
 ## Current release
 
-**CYBERVOYRAX Workspace — Phase 6.3**
+**CYBERVOYRAX Workspace — Phase 6.4**
 
-Phase 6.3 is the current baseline of the vulnerable Workspace environment. The exact vulnerability inventory is intentionally omitted to preserve the black-box assessment experience.
+Phase 6.4 is the current baseline of the vulnerable Workspace environment. The exact vulnerability inventory is intentionally omitted to preserve the black-box assessment experience.
 
 ## Safety
 

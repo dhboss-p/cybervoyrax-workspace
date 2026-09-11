@@ -35,6 +35,14 @@ services:
       REMEMBER_SESSION_TTL_DAYS: ${REMEMBER_SESSION_TTL_DAYS:-14}
       REAUTH_TTL_MINUTES: ${REAUTH_TTL_MINUTES:-10}
       UPLOAD_FOLDER: /workspace/instance/uploads
+    command: >
+      sh -c "
+      python scripts/wait_for_db.py &&
+      python scripts/migrate_phase2.py &&
+      python scripts/migrate_phase5.py &&
+      python scripts/bootstrap_database.py &&
+      gunicorn --bind 0.0.0.0:5000 --workers 2 --threads 4 'app:create_app()'
+      "
     ports:
       - "${APP_PORT:-5000}:5000"
     volumes:
