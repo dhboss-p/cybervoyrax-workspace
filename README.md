@@ -103,6 +103,16 @@ http://127.0.0.1:5000
 
 If you changed `APP_PORT` in `.env`, use that port instead.
 
+## Creating an account
+
+CYBERVOYRAX supports local user registration. Open the application and select **Create Account** from the sign-in page.
+
+New users choose their own password and department during registration. Accounts created through the registration page are standard workspace users.
+
+Users in the same CYBERVOYRAX installation share the same fictional company workspace. Projects can be shared through project membership, while company-wide resources such as the **Internal Knowledge Base** are available across the workspace.
+
+Each cloned installation uses its own local database. Accounts and workspace data are not shared between separate CYBERVOYRAX installations.
+
 ## Assessment credentials
 
 Your locally generated assessment credentials are stored in:
@@ -203,6 +213,20 @@ Run the account-baseline verification:
 docker compose exec web python scripts/verify_account_baseline.py
 ```
 
+## Password recovery
+
+Users can select **Forgot password?** on the sign-in page to start the local password-recovery flow.
+
+The assessment credentials in `.lab-credentials` are generated when the assessment account is first provisioned. Normal restarts, rebuilds, setup runs, and updates do not rotate the password.
+
+If assessment access is lost, explicitly generate a new password with:
+
+```bash
+bash scripts/reset_assessment_password.sh
+```
+
+The reset workflow updates the assessment account and refreshes `.lab-credentials`. Existing user passwords are not changed.
+
 ## Data and persistence
 
 CYBERVOYRAX separates application source code from runtime lab data.
@@ -239,7 +263,7 @@ For a normal Git-based installation, update CYBERVOYRAX with:
 bash scripts/update.sh
 ```
 
-Before applying an update, the updater creates a local backup and checks that it can safely update the installation.
+Before applying an update, the updater creates a local backup and checks that it can safely update the installation. Required workspace migrations are applied without resetting the existing database.
 
 Normal updates are designed to preserve:
 

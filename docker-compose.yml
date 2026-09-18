@@ -40,6 +40,7 @@ services:
       python scripts/wait_for_db.py &&
       python scripts/migrate_phase2.py &&
       python scripts/migrate_phase5.py &&
+        python scripts/migrate_workspace.py &&
       python scripts/bootstrap_database.py &&
       gunicorn --bind 0.0.0.0:5000 --workers 2 --threads 4 'app:create_app()'
       "

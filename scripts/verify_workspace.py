@@ -15,6 +15,6 @@ assert "p.unlink()" in ui
 assert "data-comment-edit" in tpl
 assert "return_to_project" in tpl
 assert css.exists()
-print("CYBERVOYRAX Workspace Phase 6.4 verification passed.")
+print("CYBERVOYRAX Workspace verification passed.")
 print("Comment edit/delete, owned document deletion, and activity UI upgrade are installed.")
 print("No database reset required; runtime instance data remains separate from source.")

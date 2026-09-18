@@ -93,7 +93,7 @@ PROJECTS = [
     ("CVX-P004", "Hiring Operations Review", "Review recruiting workflows and candidate handoff processes.", "ACTIVE", "Human Resources"),
     ("CVX-P005", "Support Workflow Improvement", "Improve request routing and workplace support operations.", "ACTIVE", "IT"),
     ("CVX-P006", "Vendor Renewal Program", "Coordinate key vendor review and renewal milestones.", "PLANNING", "Operations"),
-    ("CVX-P007", "Internal Knowledge Base", "Improve searchable internal documentation and ownership.", "ACTIVE", "Operations"),
+    ("CVX-P007", "Internal Knowledge Base", "Improve searchable internal documentation and ownership.", "ACTIVE", "Operations", "COMPANY"),
     ("CVX-P008", "Employee Onboarding Refresh", "Standardize the new-hire onboarding experience.", "ACTIVE", "Human Resources"),
     ("CVX-P009", "Platform Reliability Initiative", "Track reliability improvements for core internal services.", "ACTIVE", "Engineering"),
     ("CVX-P010", "Quarterly Planning Workspace", "Prepare cross-functional materials for quarterly planning.", "PLANNING", "Product"),
@@ -218,25 +218,8 @@ def main():
                 )
                 user_id_by_name[key] = cur.lastrowid
 
-            # Dedicated low-privilege assessment account. The plaintext password
-            # must be supplied locally and is never embedded in source control.
-            assessment_password = os.getenv("ASSESSMENT_PASSWORD") or secrets.token_urlsafe(24)
-            cur.execute(
-                """
-                INSERT INTO users (
-                    employee_code, email, password_hash, first_name, last_name,
-                    job_title, office_location, bio, role_id, department_id,
-                    account_status, last_login_at
-                )
-                VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,'ACTIVE',NULL)
-                """,
-                (
-                    "CVX-ASSESS", ASSESSMENT_EMAIL, bcrypt_hash(assessment_password),
-                    "Security", "Assessor", "Application Security Assessor",
-                    "Remote", "Authorized low-privilege assessment account.",
-                    role_ids["User"], dept_ids["IT"],
-                ),
-            )
+            # The assessment account is provisioned once by setup.sh so its
+            # installation-local credential remains stable across restarts/updates.
 
             dept_manager = {
                 "Engineering": user_id_by_name[("Amara", "Okafor")],
@@ -259,7 +242,9 @@ def main():
             project_id_by_code = {}
             base_start = date(2026, 8, 3)
 
-            for idx, (code, name, desc, status, dept) in enumerate(PROJECTS):
+            for idx, project in enumerate(PROJECTS):
+                code, name, desc, status, dept = project[:5]
+                visibility = project[5] if len(project) > 5 else "MEMBERS"
                 manager_id = dept_manager[dept]
                 starts_on = base_start + timedelta(days=idx * 3)
                 due_on = starts_on + timedelta(days=60 + idx * 5)
@@ -270,10 +255,10 @@ def main():
                         project_code, name, description, status, visibility,
                         manager_user_id, department_id, starts_on, due_on
                     )
-                    VALUES (%s,%s,%s,%s,'MEMBERS',%s,%s,%s,%s)
+                    VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s)
                     """,
                     (
-                        code, name, desc, status, manager_id,
+                        code, name, desc, status, visibility, manager_id,
                         dept_ids[dept], starts_on, due_on
                     ),
                 )
@@ -293,7 +278,7 @@ def main():
                 by_dept.setdefault(row["department"], []).append(row)
 
             # Memberships: manager + 3-6 coworkers, with some cross-functional members.
-            for code, name, desc, status, dept in PROJECTS:
+            for code, name, desc, status, dept, *_ in PROJECTS:
                 pid = project_id_by_code[code]
                 manager_id = dept_manager[dept]
 

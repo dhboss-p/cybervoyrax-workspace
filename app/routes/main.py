@@ -1,4 +1,6 @@
-from datetime import datetime
+from datetime import datetime, timedelta
+import uuid
+import secrets
 from flask import (
     Blueprint, current_app, make_response, redirect, render_template,
     request, url_for
@@ -8,6 +10,7 @@ from app.auth_context import login_required, load_current_user
 from app.extensions import db
 from app.services.container import build_services
 from app.services.errors import AuthenticationError
+from app.services.security import hash_password, hash_token
 
 main_bp = Blueprint("main", __name__)
 
@@ -44,6 +47,178 @@ def login():
             error = exc.message
 
     return render_template("login.html", error=error)
+
+@main_bp.route("/register", methods=["GET", "POST"])
+def register():
+    if load_current_user():
+        return redirect(url_for("main.dashboard"))
+
+    departments = db.fetch_all("SELECT id,name FROM departments ORDER BY name")
+    error = None
+
+    if request.method == "POST":
+        first_name = request.form.get("first_name", "").strip()
+        last_name = request.form.get("last_name", "").strip()
+        email = request.form.get("email", "").strip().lower()
+        job_title = request.form.get("job_title", "").strip()
+        password = request.form.get("password", "")
+        confirm_password = request.form.get("confirm_password", "")
+        department_id = request.form.get("department_id", "").strip()
+
+        if not all((first_name, last_name, email, job_title, password, confirm_password, department_id)):
+            error = "Complete all fields to create your account."
+        elif password != confirm_password:
+            error = "Passwords do not match."
+        elif len(password) < 8:
+            error = "Password must be at least 8 characters."
+        elif db.fetch_one("SELECT id FROM users WHERE LOWER(email)=LOWER(%s) LIMIT 1", (email,)):
+            error = "An account with that email already exists."
+        else:
+            department = db.fetch_one("SELECT id FROM departments WHERE id=%s", (department_id,))
+            role = db.fetch_one("SELECT id FROM roles WHERE name='User' LIMIT 1")
+            if not department or not role:
+                error = "Unable to create the account with the selected department."
+            else:
+                employee_code = f"CVX-{uuid.uuid4().hex[:6].upper()}"
+                db.execute(
+                    """INSERT INTO users(
+                           employee_code,email,password_hash,first_name,last_name,job_title,
+                           role_id,department_id,account_status
+                       ) VALUES(%s,%s,%s,%s,%s,%s,%s,%s,'ACTIVE')""",
+                    (
+                        employee_code,
+                        email,
+                        hash_password(password),
+                        first_name,
+                        last_name,
+                        job_title,
+                        role["id"],
+                        department["id"],
+                    ),
+                )
+
+                return redirect(url_for("main.login", registered="1"))
+
+    return render_template("register.html", departments=departments, error=error)
+
+
+@main_bp.route("/forgot-password", methods=["GET", "POST"])
+def forgot_password():
+    if load_current_user():
+        return redirect(url_for("main.dashboard"))
+
+    reset_url = None
+    message = None
+
+    if request.method == "POST":
+        email = request.form.get("email", "").strip().lower()
+
+        user = db.fetch_one(
+            """SELECT id
+               FROM users
+               WHERE LOWER(email)=LOWER(%s)
+                 AND account_status != 'DISABLED'
+               LIMIT 1""",
+            (email,),
+        )
+
+        if user:
+            token = secrets.token_urlsafe(48)
+            token_hash = hash_token(token)
+            expires_at = datetime.now() + timedelta(minutes=30)
+
+            db.execute(
+                """INSERT INTO password_reset_tokens(
+                       user_id, token_hash, expires_at
+                   ) VALUES(%s,%s,%s)""",
+                (user["id"], token_hash, expires_at),
+            )
+
+            reset_url = url_for(
+                "main.reset_password",
+                token=token,
+            )
+
+        message = "If that account exists, a password reset request has been created."
+
+    return render_template(
+        "forgot_password.html",
+        message=message,
+        reset_url=reset_url,
+    )
+
+
+@main_bp.route("/reset-password/<token>", methods=["GET", "POST"])
+def reset_password(token):
+    if load_current_user():
+        return redirect(url_for("main.dashboard"))
+
+    token_hash = hash_token(token)
+
+    reset = db.fetch_one(
+        """SELECT id, user_id, expires_at, used_at
+           FROM password_reset_tokens
+           WHERE token_hash=%s
+           LIMIT 1""",
+        (token_hash,),
+    )
+
+    invalid = (
+        not reset
+        or reset["used_at"] is not None
+        or reset["expires_at"] <= datetime.now()
+    )
+
+    if invalid:
+        return render_template(
+            "reset_password.html",
+            invalid=True,
+            error=None,
+        )
+
+    error = None
+
+    if request.method == "POST":
+        password = request.form.get("password", "")
+        confirm_password = request.form.get("confirm_password", "")
+
+        if not password or not confirm_password:
+            error = "Enter and confirm your new password."
+        elif password != confirm_password:
+            error = "Passwords do not match."
+        elif len(password) < 8:
+            error = "Password must be at least 8 characters."
+        else:
+            db.execute(
+                """UPDATE users
+                   SET password_hash=%s,
+                       account_status='ACTIVE'
+                   WHERE id=%s""",
+                (hash_password(password), reset["user_id"]),
+            )
+
+            db.execute(
+                """UPDATE password_reset_tokens
+                   SET used_at=NOW()
+                   WHERE id=%s""",
+                (reset["id"],),
+            )
+
+            db.execute(
+                "DELETE FROM user_sessions WHERE user_id=%s",
+                (reset["user_id"],),
+            )
+
+            return redirect(
+                url_for("main.login", password_reset="1")
+            )
+
+    return render_template(
+        "reset_password.html",
+        invalid=False,
+        error=error,
+    )
+
 
 @main_bp.post("/logout")
 def logout():

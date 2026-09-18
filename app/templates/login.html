@@ -14,16 +14,19 @@
   <section class="auth-form-panel">
     <main class="auth-box">
       <div class="auth-copy"><h2>Welcome back</h2><p>Enter your details to access your workspace.</p></div>
+      {% if request.args.get("registered") %}<div class="auth-success">Account created. Sign in with your new password.</div>{% endif %}
+      {% if request.args.get("password_reset") %}<div class="auth-success">Password updated. Sign in with your new password.</div>{% endif %}
       {% if error %}<div class="auth-error">{{error}}</div>{% endif %}
       <form class="login-form" method="post" action="/login"><input type="hidden" name="next" value="{{ request.args.get('next', '') }}"><input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
         <label><span>Work email</span><input name="email" type="email" placeholder="assessor@cybervoyrax.test" required></label>
         <label><span>Password</span><input name="password" type="password" placeholder="••••••••••••" required></label>
         <div class="auth-options">
           <label class="remember-row"><input name="remember_me" type="checkbox"><span>Remember me</span></label>
-          <a href="#">Forgot password?</a>
+          <a href="/forgot-password">Forgot password?</a>
         </div>
         <button type="submit">Sign in</button>
       </form>
+      <p class="auth-switch">Don't have an account? <a href="/register">Create one</a></p>
       <div class="auth-attribution"><span>Created by Praise Testimony</span><strong>CYBERVOYRAX</strong></div>
     </main>
   </section>
